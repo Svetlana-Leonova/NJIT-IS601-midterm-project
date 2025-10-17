@@ -17,23 +17,6 @@ This project includes a single, flexible order processing script that combines t
 - **Configuration file support** - All other settings are configurable via JSON config files
 - **Flexible usage** - Can use default config or specify custom configuration
 
-## Design
-
-The system is designed with the following principles:
-
-- **Modularity**: Each processing function has a single responsibility
-- **Error Handling**: Comprehensive error handling for file operations and data validation
-- **Type Safety**: Uses Python type hints for better code documentation and IDE support
-- **Data Validation**: Validates phone number format and handles missing data gracefully
-
-### Architecture
-
-The script follows a simple pipeline architecture:
-
-1. **Input**: Load orders from JSON file
-2. **Processing**: Extract and aggregate customer and item data
-3. **Output**: Generate formatted JSON files
-
 ### Key Functions
 
 - `load_orders()`: Safely loads and validates JSON input
@@ -46,7 +29,7 @@ The script follows a simple pipeline architecture:
 ### Prerequisites
 
 - Python 3.6 or higher
-- Valid JSON file containing order data (see example_orders.json)
+- Valid JSON input file containing order data (see example_orders.json)
 
 ### Command Line Usage
 
@@ -62,28 +45,38 @@ MacOS(Unix):
 python3 process_orders.py <input_file.json> [config_file.json]
 ```
 
+#### Options
+
+- `-c, --config FILE`: Configuration file to use. Default: `config.json`.
+- `-o, --output-dir DIR`: Output directory for generated files. Default: current directory.
+- `-v, --verbose`: Enable verbose output with extra details.
+
 ### Examples
 
 ```bash
 # Use default config
-python3 process_orders.py example_orders.json
+python process_orders.py example_orders.json
 
 # Use custom config
-python3 process_orders.py example_orders.json my_config.json
+python process_orders.py example_orders.json my_config.json
+
+# Verbose mode
+python process_orders.py example_orders.json --verbose
+
+# Custom output directory
+python process_orders.py example_orders.json --output-dir results
+
+# Combine options
+python process_orders.py example_orders.json -c my_config.json -o results -v
 
 # Process different input files
-python3 process_orders.py january_orders.json
-python3 process_orders.py february_orders.json
+python process_orders.py january_orders.json
+python process_orders.py february_orders.json
 ```
-
-This will generate:
-
-- `customers.json`: Customer phone number to name mapping
-- `items.json`: Item analytics with pricing and order counts
 
 ## Configuration Files
 
-The configuration-based scripts use JSON configuration files to customize behavior:
+Use JSON configuration files to customize behavior:
 
 ### Default Configuration (config.json)
 
@@ -178,15 +171,6 @@ The script expects a JSON file containing an array of order objects with the fol
 }
 ```
 
-## Error Handling
-
-The script handles various error conditions:
-
-- Missing or invalid input files
-- Malformed JSON data
-- Invalid phone number formats
-- File write permissions
-
 ## Development
 
 This project follows Python best practices:
@@ -197,36 +181,6 @@ This project follows Python best practices:
 - Modular function design
 - Proper error handling and user feedback
 - Configuration file support for flexibility
-
-### Script Features
-
-The single script (`process_orders.py`) provides:
-
-- **Command-line input file** - Specify input file as first argument
-- **Optional configuration file** - Use default `config.json` or specify custom config
-- **Flexible output settings** - Output file names and formatting are configurable
-- **Robust error handling** - Comprehensive validation and error messages
-
-### Key Features
-
-- **Input Validation**: Robust phone number validation using regex
-- **Error Handling**: Comprehensive error handling for file operations
-- **Type Safety**: Full type hints for better IDE support
-- **Modularity**: Clean separation of concerns
-- **Configurability**: Flexible configuration system
-- **Performance**: Optimized regex compilation and data processing
-
-## File Structure
-
-```
-project/
-├── process_orders.py                   # Main processing script
-├── config.json                         # Default configuration
-├── example_orders.json                 # Sample input data
-├── customers.json                      # Generated customer data
-├── items.json                          # Generated item data
-└── README.md                           # This documentation
-```
 
 ## Testing
 
