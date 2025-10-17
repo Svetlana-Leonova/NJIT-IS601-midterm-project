@@ -1,0 +1,8 @@
+{
+	"output_customers": "customers.json",
+	"output_items": "items.json",
+	"phone_pattern": "^\\d{3}-\\d{3}-\\d{4}$",
+	"sort_output": true,
+	"encoding": "utf-8",
+	"indent": 4
+}
