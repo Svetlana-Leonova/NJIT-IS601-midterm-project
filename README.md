@@ -28,7 +28,7 @@ The script follows a simple pipeline architecture:
 
 ### Key Functions
 
-- `process_orders()`: Safely loads and validates JSON input
+- `load_orders()`: Safely loads and validates JSON input
 - `process_customers()`: Creates phone-to-name mapping with duplicate handling
 - `process_items()`: Aggregates item pricing and order counts
 - `save_json()`: Writes formatted JSON output with proper encoding

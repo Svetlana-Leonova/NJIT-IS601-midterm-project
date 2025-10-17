@@ -16,11 +16,28 @@ Usage:
 
 import json
 import sys
+import re
 from collections import defaultdict
 from typing import Dict, Any, List
 
+# Compile regex pattern once for better performance
+PHONE_PATTERN = re.compile(r'^\d{3}-\d{3}-\d{4}$')
 
-def process_orders(filename: str) -> List[Dict[str, Any]]:
+
+def validate_phone_number(phone: str) -> bool:
+    """
+    Validate phone number format.
+
+    Args:
+        phone: Phone number string to validate
+
+    Returns:
+        True if phone number is in correct format (xxx-xxx-xxxx), False otherwise
+    """
+    return bool(PHONE_PATTERN.match(phone.strip()))
+
+
+def load_orders(filename: str) -> List[Dict[str, Any]]:
     """
     Load orders from a JSON file.
 
@@ -61,8 +78,8 @@ def process_customers(orders: List[Dict[str, Any]]) -> Dict[str, str]:
         phone = order.get('phone', '').strip()
         name = order.get('name', '').strip()
 
-        # Validate phone number format (xxx-xxx-xxxx)
-        if phone and name and len(phone) == 12 and phone.count('-') == 2:
+        # Validate phone number format (xxx-xxx-xxxx) using regex
+        if phone and name and validate_phone_number(phone):
             # Only add the phone number if it is not already in the dictionary
             if phone not in customers:
                 customers[phone] = name
@@ -110,9 +127,9 @@ def save_json(data: Dict[str, Any], filename: str) -> None:
     """
     try:
         with open(filename, 'w', encoding='utf-8') as file:
-            json.dump(data, file, indent=4, ensure_ascii=False)
+            json.dump(data, file, indent=4, ensure_ascii=False, sort_keys=True)
         print(f"Successfully created {filename}")
-    except IOError as e:
+    except (IOError, OSError) as e:
         print(f"Error writing to {filename}: {e}")
         sys.exit(1)
 
@@ -133,9 +150,9 @@ def main():
 
     print(f"Processing orders from: {orders_file}")
 
-    # Process orders
-    orders = process_orders(orders_file)
-    print(f"Processed {len(orders)} orders")
+    # Load orders
+    orders = load_orders(orders_file)
+    print(f"Loaded {len(orders)} orders")
 
     # Process customers
     customers = process_customers(orders)
