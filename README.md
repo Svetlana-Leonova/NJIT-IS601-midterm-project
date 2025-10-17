@@ -93,14 +93,14 @@ Use JSON configuration files to customize behavior:
 
 ### Configuration Options
 
-| Option             | Description                        | Default                  | Example                  |
-| ------------------ | ---------------------------------- | ------------------------ | ------------------------ |
-| `output_customers` | Output filename for customer data  | `customers.json`         | `"my_customers.json"`    |
-| `output_items`     | Output filename for item data      | `items.json`             | `"my_items.json"`        |
-| `phone_pattern`    | Regex pattern for phone validation | `^\\d{3}-\\d{3}-\\d{4}$` | `^\\d{3}-\\d{3}-\\d{4}$` |
-| `sort_output`      | Sort JSON output keys              | `true`                   | `false`                  |
-| `encoding`         | File encoding                      | `utf-8`                  | `"utf-8"`                |
-| `indent`           | JSON indentation spaces            | `4`                      | `2`                      |
+| Option             | Description                        | Default                  |
+| ------------------ | ---------------------------------- | ------------------------ |
+| `output_customers` | Output filename for customer data  | `customers.json`         |
+| `output_items`     | Output filename for item data      | `items.json`             |
+| `phone_pattern`    | Regex pattern for phone validation | `^\\d{3}-\\d{3}-\\d{4}$` |
+| `sort_output`      | Sort JSON output keys              | `true`                   |
+| `encoding`         | File encoding                      | `utf-8`                  |
+| `indent`           | JSON indentation spaces            | `4`                      |
 
 ### Creating Custom Configurations
 
@@ -188,16 +188,15 @@ The script has been tested with the provided `example_orders.json` file, which c
 
 - **10,000 orders** from 30 unique customers
 - **19 unique menu items**
-- Various phone number formats and data structures
 
 ### Test Commands
 
 ```bash
 # Test with default config
-python3 process_orders.py example_orders.json
+python process_orders.py example_orders.json
 
 # Test with custom config (create your own config file)
-python3 process_orders.py example_orders.json my_config.json
+python process_orders.py example_orders.json my_config.json
 ```
 
 The script successfully generates the required output files with correct data processing and formatting.
