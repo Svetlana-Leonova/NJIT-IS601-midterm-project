@@ -7,17 +7,69 @@ This script reads JSON orders from a file and generates two output files:
 2. items.json - Maps menu item names to their price and calculates the number of times each item has been ordered
 
 Usage:
-    python3 process_orders.py <input_file.json> [config_file.json]
+    python3 process_orders.py <input_file.json> [options]
 
-The input file is required as a command-line argument.
-If no config file is provided, it will look for 'config.json' in the current directory.
+Options:
+    -c, --config FILE     Configuration file (default: config.json)
+    -o, --output-dir DIR  Output directory (default: current directory)
+    -v, --verbose         Enable verbose output
+    -h, --help           Show help message
+
+Examples:
+    python3 process_orders.py example_orders.json
+    python3 process_orders.py example_orders.json --config my_config.json
+    python3 process_orders.py example_orders.json --output-dir results --verbose
 """
 
 import json
 import sys
 import re
+import argparse
 from collections import defaultdict
 from typing import Dict, Any, List, Optional
+
+
+def parse_arguments() -> argparse.Namespace:
+    """
+    Parse command line arguments using argparse.
+
+    Returns:
+        Parsed arguments namespace
+    """
+    parser = argparse.ArgumentParser(
+        description='Process JSON order data and generate customer and item analytics files.',
+        epilog='Example: python3 process_orders.py example_orders.json --config my_config.json',
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+
+    # Required positional argument
+    parser.add_argument(
+        'input_file',
+        help='Input JSON file containing order data'
+    )
+
+    # Optional config file argument
+    parser.add_argument(
+        '--config', '-c',
+        default='config.json',
+        help='Configuration file (default: config.json)'
+    )
+
+    # Optional verbose output
+    parser.add_argument(
+        '--verbose', '-v',
+        action='store_true',
+        help='Enable verbose output'
+    )
+
+    # Optional output directory
+    parser.add_argument(
+        '--output-dir', '-o',
+        default='.',
+        help='Output directory for generated files (default: current directory)'
+    )
+
+    return parser.parse_args()
 
 
 def load_config(config_file: str = "config.json") -> Dict[str, Any]:
@@ -152,7 +204,7 @@ def process_items(orders: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
     return dict(items)
 
 
-def save_json(data: Dict[str, Any], filename: str, config: Dict[str, Any]) -> None:
+def save_json(data: Dict[str, Any], filename: str, config: Dict[str, Any], output_dir: str = '.') -> None:
     """
     Save data to a JSON file with configurable formatting.
 
@@ -160,17 +212,27 @@ def save_json(data: Dict[str, Any], filename: str, config: Dict[str, Any]) -> No
         data: Dictionary to save
         filename: Output filename
         config: Configuration dictionary
+        output_dir: Output directory path
     """
+    import os
+
     try:
+        # Create output directory if it doesn't exist
+        if output_dir != '.' and not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        # Construct full file path
+        full_path = os.path.join(output_dir, filename)
+
         encoding = config.get('encoding', 'utf-8')
         indent = config.get('indent', 4)
         sort_keys = config.get('sort_output', True)
 
-        with open(filename, 'w', encoding=encoding) as file:
+        with open(full_path, 'w', encoding=encoding) as file:
             json.dump(data, file, indent=indent, ensure_ascii=False, sort_keys=sort_keys)
-        print(f"Successfully created {filename}")
+        print(f"Successfully created {full_path}")
     except (IOError, OSError) as e:
-        print(f"Error writing to {filename}: {e}")
+        print(f"Error writing to {full_path}: {e}")
         sys.exit(1)
 
 
@@ -178,34 +240,23 @@ def main():
     """
     Main function to process orders and generate output files.
     """
-    # Check command line arguments
-    if len(sys.argv) < 2 or len(sys.argv) > 3:
-        print("Error: Invalid number of arguments")
-        print("Usage: python3 process_orders.py <input_file.json> [config_file.json]")
-        print("")
-        print("Examples:")
-        print("  python3 process_orders.py example_orders.json")
-        print("  python3 process_orders.py example_orders.json my_config.json")
-        sys.exit(1)
-
-    # Get input file from command line (required)
-    input_file = sys.argv[1]
-
-    # Get config file from command line (optional)
-    config_file = sys.argv[2] if len(sys.argv) == 3 else "config.json"
+    # Parse command line arguments
+    args = parse_arguments()
 
     # Load configuration
-    config = load_config(config_file)
+    config = load_config(args.config)
 
-    print(f"Using configuration from: {config_file}")
-    print(f"Processing orders from: {input_file}")
+    if args.verbose:
+        print(f"Using configuration from: {args.config}")
+        print(f"Processing orders from: {args.input_file}")
+        print(f"Output directory: {args.output_dir}")
 
     # Compile phone pattern from config
     phone_pattern_str = config.get('phone_pattern', r'^\d{3}-\d{3}-\d{4}$')
     phone_pattern = re.compile(phone_pattern_str)
 
     # Load orders
-    orders = load_orders(input_file)
+    orders = load_orders(args.input_file)
     print(f"Loaded {len(orders)} orders")
 
     # Process customers
@@ -216,9 +267,9 @@ def main():
     items = process_items(orders)
     print(f"Found {len(items)} unique items")
 
-    # Save output files using config
-    save_json(customers, config['output_customers'], config)
-    save_json(items, config['output_items'], config)
+    # Save output files using config and output directory
+    save_json(customers, config['output_customers'], config, args.output_dir)
+    save_json(items, config['output_items'], config, args.output_dir)
 
     print("Processing complete!")
 
